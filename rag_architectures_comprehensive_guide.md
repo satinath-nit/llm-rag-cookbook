@@ -1,5 +1,5 @@
 # Comprehensive Guide to RAG Architecture Patterns
-## Detailed Explanations and Flow Diagrams
+## Detailed Explanations with Block Diagrams and Flow Diagrams
 
 ---
 
@@ -8,17 +8,33 @@
 ### **Description**
 The foundational RAG pattern that follows a straightforward retrieve-then-generate workflow. This is the most basic implementation where user queries directly trigger document retrieval followed by response generation.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │   Vector DB     │    │      LLM        │
+│   Query     │───▶│   (Documents)   │───▶│   Generator     │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                            │                       │
+                            ▼                       ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │   Embedding     │    │   Generated     │
+                   │    Model        │    │   Response      │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Query Processing]
+[Query Processing & Embedding]
     ↓
-[Vector Search/Retrieval]
+[Vector Similarity Search]
     ↓
-[Retrieved Documents]
+[Retrieved Documents (Top-K)]
     ↓
-[Context + Query → LLM]
+[Context Assembly: Query + Documents]
+    ↓
+[LLM Generation]
     ↓
 Generated Response
 ```
@@ -57,9 +73,29 @@ Generated Response
 ### **Description**
 Extends basic RAG by maintaining conversation history and context across multiple interactions. This pattern enables more natural conversational experiences.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │   Memory        │    │   Vector DB     │
+│   Query     │───▶│   Store         │───▶│   (Documents)   │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                            │                       │
+                            ▼                       ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │ Conversation    │    │      LLM        │
+                   │   Context       │───▶│   Generator     │
+                   └─────────────────┘    └─────────────────┘
+                            ▲                       │
+                            │                       ▼
+                            └───────────────────────┘
+                                 Update Memory
+```
+
 ### **Flow Diagram**
 ```
 User Query + Conversation History
+    ↓
+[Load Previous Context from Memory]
     ↓
 [Context Assembly: Current Query + Previous Context]
     ↓
@@ -110,13 +146,35 @@ Generated Response
 ### **Description**
 Breaks RAG into specialized, interchangeable modules that can be independently optimized and customized. This architecture promotes flexibility and scalability.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Query     │    │   Retrieval     │    │   Reranking     │
+│ Processing  │───▶│   Strategy      │───▶│    Module       │
+│   Module    │    │    Module       │    │                 │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                                                   │
+┌─────────────┐    ┌─────────────────┐           ▼
+│    Post     │    │   Generation    │    ┌─────────────────┐
+│ Processing  │◀───│    Module       │◀───│   Context       │
+│   Module    │    │                 │    │  Assembly       │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+       │                                           ▲
+       ▼                                           │
+┌─────────────┐    ┌─────────────────┐           │
+│   Final     │    │   Document      │───────────┘
+│  Response   │    │   Retrieval     │
+└─────────────┘    │    Module       │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
 [Query Processing Module]
     ↓
-[Retrieval Strategy Module]
+[Retrieval Strategy Selection Module]
     ↓
 [Document Retrieval Module]
     ↓
@@ -167,23 +225,50 @@ Final Response
 ### **Description**
 Uses AI agents to intelligently orchestrate the RAG process, making autonomous decisions about when to retrieve, what sources to use, and how to synthesize information.
 
+### **Block Diagram**
+```
+                    ┌─────────────────┐
+                    │     Agent       │
+                    │   Controller    │
+                    └─────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│   Query     │    │   Retrieval     │    │ Synthesis   │
+│  Analysis   │    │    Agent(s)     │    │   Agent     │
+│   Agent     │    │                 │    │             │
+└─────────────┘    └─────────────────┘    └─────────────┘
+                            │                   │
+                            ▼                   ▼
+                   ┌─────────────────┐    ┌─────────────┐
+                   │  Data Sources   │    │  Quality    │
+                   │   (Multiple)    │    │ Assessment  │
+                   └─────────────────┘    │   Agent     │
+                                          └─────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Agent Controller]
+[Agent Controller Initialization]
     ↓
 [Query Analysis Agent]
     ↓
-[Decision: Retrieval Strategy]
+[Decision: Retrieval Strategy & Sources]
     ↓
 [Retrieval Agent(s)] ←→ [Multiple Data Sources]
+    ↓
+[Information Collection & Validation]
     ↓
 [Synthesis Agent]
     ↓
 [Quality Assessment Agent]
     ↓
 [Decision: Sufficient/Need More Info]
+    ↓
+[Iterative Loop if Needed]
     ↓
 Generated Response
 ```
@@ -224,13 +309,34 @@ Generated Response
 ### **Description**
 Microsoft's approach that builds and utilizes knowledge graphs for enhanced retrieval and reasoning. It creates structured representations of relationships between entities.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Document   │    │     Entity      │    │   Knowledge     │
+│ Collection  │───▶│   Extraction    │───▶│     Graph       │
+└─────────────┘    │    & Linking    │    │   Database      │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+┌─────────────┐    ┌─────────────────┐           ▼
+│    User     │    │     Entity      │    ┌─────────────────┐
+│   Query     │───▶│  Recognition    │───▶│     Graph       │
+└─────────────┘    │   in Query      │    │   Traversal     │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │      LLM        │◀───│   Subgraph      │
+                   │   Generator     │    │   Extraction    │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 Documents
     ↓
-[Entity Extraction]
+[Entity Extraction & Recognition]
     ↓
-[Relationship Mapping]
+[Relationship Mapping & Classification]
     ↓
 [Knowledge Graph Construction]
     ↓
@@ -238,13 +344,15 @@ User Query
     ↓
 [Entity Recognition in Query]
     ↓
-[Graph Traversal & Subgraph Extraction]
+[Graph Traversal & Path Finding]
+    ↓
+[Subgraph Extraction (Relevant Entities + Relations)]
     ↓
 [Graph-based Context Assembly]
     ↓
-[LLM with Graph Context]
+[LLM with Graph Context + Original Documents]
     ↓
-Response with Relationship Understanding
+Response with Enhanced Relationship Understanding
 ```
 
 ### **Detailed Process**
@@ -282,19 +390,42 @@ Response with Relationship Understanding
 ### **Description**
 Generates hypothetical answers first, then retrieves documents similar to these hypothetical responses. This bridges the semantic gap between queries and documents.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │      LLM        │    │   Embedding     │
+│   Query     │───▶│  (Hypothesis    │───▶│     Model       │
+└─────────────┘    │  Generation)    │    │                 │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Final     │    │      LLM        │    │   Vector DB     │
+│  Response   │◀───│  (Final Gen)    │◀───│   Search        │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                            ▲                       │
+                            │                       ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │   Original      │    │   Retrieved     │
+                   │    Query        │    │   Documents     │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
 [LLM: Generate Hypothetical Answer]
     ↓
-[Embed Hypothetical Answer]
+[Embed Hypothetical Answer using Same Model]
     ↓
-[Vector Search: Find Similar Documents]
+[Vector Similarity Search: Find Documents Similar to Hypothesis]
     ↓
-[Retrieved Real Documents]
+[Retrieved Real Documents (Top-K)]
     ↓
-[Original Query + Retrieved Docs → LLM]
+[Context Assembly: Original Query + Retrieved Documents]
+    ↓
+[LLM Final Generation with Real Context]
     ↓
 Final Accurate Response
 ```
@@ -334,21 +465,55 @@ Final Accurate Response
 ### **Description**
 Uses multiple embedding models or creates different vector representations to capture various aspects of content (semantic, syntactic, domain-specific).
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Document   │    │   Semantic      │    │   Vector DB     │
+│ Collection  │───▶│   Embedding     │───▶│   (Semantic)    │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+       │
+       ├───────────▶┌─────────────────┐───▶┌─────────────────┐
+       │            │   Keyword       │    │   Vector DB     │
+       │            │   Embedding     │    │   (Keyword)     │
+       │            └─────────────────┘    └─────────────────┘
+       │
+       └───────────▶┌─────────────────┐───▶┌─────────────────┐
+                    │    Domain       │    │   Vector DB     │
+                    │   Embedding     │    │   (Domain)      │
+                    └─────────────────┘    └─────────────────┘
+                                                   │
+┌─────────────┐    ┌─────────────────┐           ▼
+│    User     │    │   Multi-Vector  │    ┌─────────────────┐
+│   Query     │───▶│     Query       │───▶│     Fusion      │
+└─────────────┘    │   Encoding      │    │   Algorithm     │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │      LLM        │◀───│    Unified      │
+                   │   Generator     │    │    Context      │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 Documents
     ↓
-[Multiple Embedding Models]
+[Multiple Embedding Models Processing]
     ↓
 [Semantic Vectors] [Keyword Vectors] [Domain Vectors]
     ↓
+[Store in Separate Vector Databases]
+    ↓
 User Query
     ↓
-[Multi-Vector Query Encoding]
+[Multi-Vector Query Encoding (All Models)]
     ↓
-[Parallel Vector Searches]
+[Parallel Vector Searches Across All DBs]
     ↓
-[Result Fusion & Ranking]
+[Collect Results from All Vector Spaces]
+    ↓
+[Result Fusion & Ranking Algorithm]
     ↓
 [Unified Retrieved Context]
     ↓
@@ -392,23 +557,54 @@ Response
 ### **Description**
 Retrieves information at multiple granularity levels (document, section, paragraph, sentence) to provide comprehensive and contextually appropriate responses.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Document   │    │   Document      │    │   Document      │
+│ Collection  │───▶│   Level Index   │───▶│   Level Search  │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+       │                                           │
+       ├───────────▶┌─────────────────┐───▶┌─────────────────┐
+       │            │   Section       │    │   Section       │
+       │            │   Level Index   │    │   Level Search  │
+       │            └─────────────────┘    └─────────────────┘
+       │                                           │
+       └───────────▶┌─────────────────┐───▶┌─────────────────┐
+                    │  Paragraph      │    │  Paragraph      │
+                    │  Level Index    │    │  Level Search   │
+                    └─────────────────┘    └─────────────────┘
+                                                   │
+┌─────────────┐    ┌─────────────────┐           ▼
+│    User     │    │  Granularity    │    ┌─────────────────┐
+│   Query     │───▶│   Analysis      │───▶│  Hierarchical   │
+└─────────────┘    └─────────────────┘    │   Context       │
+                                          │   Assembly      │
+                                          └─────────────────┘
+                                                   │
+                                                   ▼
+                                          ┌─────────────────┐
+                                          │      LLM        │
+                                          │   Generator     │
+                                          └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Granularity Analysis]
+[Query Complexity & Granularity Analysis]
     ↓
-[Document-Level Search] → [Relevant Documents]
+[Document-Level Search] → [Relevant Documents Identified]
     ↓
-[Section-Level Search] → [Relevant Sections]
+[Section-Level Search within Documents] → [Relevant Sections]
     ↓
-[Paragraph-Level Search] → [Relevant Paragraphs]
+[Paragraph-Level Search within Sections] → [Relevant Paragraphs]
     ↓
-[Hierarchical Context Assembly]
+[Hierarchical Context Assembly (Maintain Structure)]
     ↓
 [Multi-Level Context → LLM]
     ↓
-Response
+Response with Hierarchical Understanding
 ```
 
 ### **Detailed Process**
@@ -446,21 +642,47 @@ Response
 ### **Description**
 Rewrites and optimizes user queries before retrieval to improve search effectiveness and handle ambiguous or poorly formed queries.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │     Query       │    │     Query       │
+│   Query     │───▶│   Analysis      │───▶│   Rewriting     │
+│ (Original)  │    │    Module       │    │    Module       │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Final     │    │      LLM        │    │   Vector DB     │
+│  Response   │◀───│   Generator     │◀───│    Search       │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                            ▲                       │
+                            │                       ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │   Original      │    │   Retrieved     │
+                   │    Query        │    │   Documents     │
+                   │   Context       │    │                 │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 Original User Query
     ↓
-[Query Analysis]
+[Query Analysis (Ambiguity, Completeness, Intent)]
     ↓
-[Query Rewriting/Expansion]
+[Query Rewriting Strategy Selection]
     ↓
-[Optimized Query]
+[Query Rewriting/Expansion/Clarification]
+    ↓
+[Optimized Query Generation]
     ↓
 [Vector Search with Optimized Query]
     ↓
 [Retrieved Documents]
     ↓
-[Original Query + Context → LLM]
+[Context Assembly: Original Query Intent + Retrieved Context]
+    ↓
+[LLM Generation]
     ↓
 Response
 ```
@@ -500,19 +722,50 @@ Response
 ### **Description**
 Generates multiple variations of the user's query to ensure comprehensive information retrieval and reduce the risk of missing relevant information.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐
+│    User     │    │     Query       │
+│   Query     │───▶│   Variation     │
+│ (Original)  │    │   Generator     │
+└─────────────┘    └─────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│   Query 1   │    │     Query 2     │    │   Query N   │
+│  Retrieval  │    │    Retrieval    │    │  Retrieval  │
+└─────────────┘    └─────────────────┘    └─────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            ▼
+                   ┌─────────────────┐
+                   │  Deduplication  │
+                   │   & Ranking     │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │      LLM        │
+                   │   Generator     │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 Original Query
     ↓
-[Query Variation Generation]
+[Query Variation Generation (Paraphrases, Expansions, Perspectives)]
     ↓
 [Query 1] [Query 2] [Query 3] [Query N]
     ↓
-[Parallel Retrieval for Each Query]
+[Parallel Retrieval for Each Query Variation]
     ↓
 [Result Set 1] [Result Set 2] [Result Set 3] [Result Set N]
     ↓
-[Result Deduplication & Ranking]
+[Result Collection & Deduplication]
+    ↓
+[Cross-Query Relevance Ranking]
     ↓
 [Unified Context Assembly]
     ↓
@@ -556,19 +809,50 @@ Response
 ### **Description**
 The model evaluates its own outputs and retrieval decisions using special reflection tokens, enabling self-correction and improved reliability.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │   Retrieval     │    │   Vector DB     │
+│   Query     │───▶│   Decision      │───▶│   (Optional)    │
+└─────────────┘    │   Module        │    └─────────────────┘
+                   └─────────────────┘             │
+                            │                      ▼
+                            ▼              ┌─────────────────┐
+                   ┌─────────────────┐     │   Retrieved     │
+                   │      LLM        │◀────│   Documents     │
+                   │  (with Self-    │     │   (if needed)   │
+                   │  Reflection)    │     └─────────────────┘
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ Self-Evaluation │
+                   │   & Decision    │
+                   │    Module       │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ Accept/Revise/  │
+                   │  Re-retrieve    │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Retrieval Decision Assessment]
+[Retrieval Necessity Assessment with Reflection Tokens]
     ↓
-[Retrieve?] → Yes/No
+[Decision: Retrieve?] → Yes/No
     ↓
 [Document Retrieval] (if needed)
     ↓
-[Generate Response with Reflection Tokens]
+[Generate Response with Self-Reflection Tokens]
     ↓
 [Self-Evaluation: Relevance, Support, Utility]
+    ↓
+[Quality Assessment using Reflection Tokens]
     ↓
 [Decision: Accept/Revise/Re-retrieve]
     ↓
@@ -610,21 +894,57 @@ User Query
 ### **Description**
 Evaluates the quality and relevance of retrieved documents and performs corrective actions (re-retrieval, web search, or knowledge utilization) when needed.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │   Initial       │    │   Relevance     │
+│   Query     │───▶│   Retrieval     │───▶│   Evaluator     │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                                                   │
+                    ┌──────────────────────────────┼──────────────────────────────┐
+                    ▼                              ▼                              ▼
+           ┌─────────────────┐            ┌─────────────────┐            ┌─────────────────┐
+           │ High Relevance  │            │ Mixed Relevance │            │ Low Relevance   │
+           │   → Direct      │            │ → Filter +      │            │ → Web Search/   │
+           │   Generation    │            │   Web Search    │            │   Re-retrieval  │
+           └─────────────────┘            └─────────────────┘            └─────────────────┘
+                    │                              │                              │
+                    └──────────────────────────────┼──────────────────────────────┘
+                                                   ▼
+                                          ┌─────────────────┐
+                                          │   Corrected     │
+                                          │    Context      │
+                                          │   Assembly      │
+                                          └─────────────────┘
+                                                   │
+                                                   ▼
+                                          ┌─────────────────┐
+                                          │      LLM        │
+                                          │   Generator     │
+                                          └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Initial Retrieval]
+[Initial Document Retrieval]
     ↓
-[Document Relevance Evaluation]
+[Document Relevance & Quality Evaluation]
     ↓
-[High Relevance] → [Generate Response]
+[Relevance Scoring & Classification]
+    ↓
+[High Relevance] → [Direct Generation]
 [Low Relevance] → [Web Search/Re-retrieval]
-[Mixed Relevance] → [Filter + Web Search]
+[Mixed Relevance] → [Filter Relevant + Web Search]
+    ↓
+[Corrective Action Execution]
     ↓
 [Corrected Context Assembly]
     ↓
-[Final Response Generation]
+[Final Response Generation with Quality Check]
+    ↓
+Response
 ```
 
 ### **Detailed Process**
@@ -662,22 +982,51 @@ User Query
 ### **Description**
 Dynamically selects the most appropriate RAG strategy based on query characteristics, complexity, and available resources.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │     Query       │    │   Strategy      │
+│   Query     │───▶│   Complexity    │───▶│   Selection     │
+└─────────────┘    │   Analyzer      │    │    Engine       │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+        ┌──────────────────────────────────────────┼──────────────────────────────────────────┐
+        ▼                              ▼                              ▼                        ▼
+┌─────────────┐            ┌─────────────────┐            ┌─────────────┐            ┌─────────────┐
+│   Simple    │            │    Complex      │            │Multi-faceted│            │Conversational│
+│    RAG      │            │     RAG         │            │ Branched RAG│            │ Memory RAG  │
+└─────────────┘            └─────────────────┘            └─────────────┘            └─────────────┘
+        │                              │                              │                        │
+        └──────────────────────────────┼──────────────────────────────┼────────────────────────┘
+                                       ▼                              ▼
+                              ┌─────────────────┐            ┌─────────────────┐
+                              │   Performance   │            │     Final       │
+                              │   Monitoring    │            │   Response      │
+                              └─────────────────┘            └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Query Complexity Analysis]
+[Query Complexity & Type Analysis]
+    ↓
+[Resource Assessment (Time, Compute, Accuracy Requirements)]
     ↓
 [Strategy Selection Engine]
     ↓
 [Simple Query] → [Basic RAG]
-[Complex Query] → [Advanced RAG]
+[Complex Query] → [Advanced RAG (Self-RAG, CRAG)]
 [Multi-faceted] → [Branched RAG]
 [Conversational] → [Memory RAG]
     ↓
-[Execute Selected Strategy]
+[Execute Selected Strategy with Optimal Parameters]
     ↓
-[Response Generation]
+[Performance Monitoring & Feedback]
+    ↓
+[Strategy Adjustment if Needed]
+    ↓
+Response Generation
 ```
 
 ### **Detailed Process**
@@ -715,21 +1064,64 @@ User Query
 ### **Description**
 Decomposes complex queries into multiple sub-queries that are processed in parallel, then synthesizes results for comprehensive responses.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐
+│   Complex   │    │     Query       │
+│    User     │───▶│  Decomposition  │
+│   Query     │    │    Module       │
+└─────────────┘    └─────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│ Sub-query 1 │    │   Sub-query 2   │    │ Sub-query N │
+│ RAG Pipeline│    │  RAG Pipeline   │    │ RAG Pipeline│
+└─────────────┘    └─────────────────┘    └─────────────┘
+        │                   │                   │
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│  Result 1   │    │    Result 2     │    │  Result N   │
+└─────────────┘    └─────────────────┘    └─────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            ▼
+                   ┌─────────────────┐
+                   │     Result      │
+                   │   Synthesis     │
+                   │   & Integration │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ Comprehensive   │
+                   │ Final Response  │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 Complex User Query
     ↓
-[Query Decomposition]
+[Query Analysis & Complexity Assessment]
+    ↓
+[Query Decomposition into Sub-queries]
     ↓
 [Sub-query 1] [Sub-query 2] [Sub-query 3] [Sub-query N]
     ↓
-[Parallel Retrieval & Generation]
+[Parallel RAG Processing for Each Sub-query]
+    ↓
+[Individual Retrieval & Generation]
     ↓
 [Result 1] [Result 2] [Result 3] [Result N]
     ↓
+[Dependency Resolution & Consistency Check]
+    ↓
 [Result Synthesis & Integration]
     ↓
-[Comprehensive Final Response]
+[Comprehensive Final Response Assembly]
+    ↓
+Final Response
 ```
 
 ### **Detailed Process**
@@ -767,25 +1159,64 @@ Complex User Query
 ### **Description**
 Performs multiple cycles of retrieval and generation, using insights from each cycle to inform subsequent retrievals for progressive refinement.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │    Initial      │    │   Response      │
+│   Query     │───▶│   Retrieval     │───▶│   Analysis      │
+└─────────────┘    │   & Generation  │    │    Module       │
+                   └─────────────────┘    └─────────────────┘
+                            ▲                       │
+                            │                       ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │   Enhanced      │    │ Information Gap │
+                   │   Context       │◀───│  Identification │
+                   │   Assembly      │    └─────────────────┘
+                   └─────────────────┘             │
+                            ▲                       ▼
+                            │              ┌─────────────────┐
+                   ┌─────────────────┐     │    Refined      │
+                   │   Additional    │◀────│   Retrieval     │
+                   │   Retrieval     │     │     Query       │
+                   └─────────────────┘     └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │  Completeness   │
+                   │     Check       │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ Final Response  │
+                   │  or Continue    │
+                   │   Iteration     │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Initial Retrieval & Generation]
+[Initial Retrieval & Generation Cycle]
     ↓
 [Partial Response Analysis]
     ↓
-[Identify Information Gaps]
+[Information Gap Identification]
     ↓
-[Refined Retrieval Query]
+[Gap Assessment: Critical/Minor/Complete]
     ↓
-[Additional Retrieval]
+[Refined Retrieval Query Generation]
     ↓
-[Enhanced Context Assembly]
+[Additional Retrieval (Targeted)]
     ↓
-[Improved Generation]
+[Enhanced Context Assembly (Cumulative)]
     ↓
-[Completeness Check] → [Iterate if needed]
+[Improved Generation with Enhanced Context]
+    ↓
+[Completeness & Quality Check]
+    ↓
+[Decision: Iterate/Finalize] → [Loop if needed]
     ↓
 [Final Response]
 ```
@@ -825,21 +1256,65 @@ User Query
 ### **Description**
 Combines multiple retrieval methods, ranking algorithms, and information sources to create a unified and comprehensive retrieval system.
 
+### **Block Diagram**
+```
+┌─────────────┐
+│    User     │
+│   Query     │
+└─────────────┘
+        │
+        ├─────────────────────────────────────────────────────────────┐
+        ▼                   ▼                   ▼                     ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Vector    │    │    Keyword      │    │    Graph    │    │   Hybrid    │
+│   Search    │    │     Search      │    │   Search    │    │   Search    │
+└─────────────┘    └─────────────────┘    └─────────────┘    └─────────────┘
+        │                   │                   │                     │
+        ▼                   ▼                   ▼                     ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Result Set 1│    │  Result Set 2   │    │Result Set 3 │    │Result Set N │
+└─────────────┘    └─────────────────┘    └─────────────┘    └─────────────┘
+        │                   │                   │                     │
+        └───────────────────┼───────────────────┼─────────────────────┘
+                            ▼                   ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │     Fusion      │    │     Score       │
+                   │   Algorithm     │    │  Normalization  │
+                   │   (RRF/Weighted)│    └─────────────────┘
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │   Unified       │
+                   │   Ranking       │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │      LLM        │
+                   │   Generator     │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Multiple Retrieval Methods]
+[Query Distribution to Multiple Retrieval Methods]
     ↓
 [Vector Search] [Keyword Search] [Graph Search] [Hybrid Search]
     ↓
-[Multiple Result Sets]
+[Parallel Execution & Result Collection]
     ↓
-[Fusion Algorithm (RRF/Weighted)]
+[Multiple Result Sets with Different Scoring]
     ↓
-[Unified Ranking]
+[Score Normalization Across Methods]
     ↓
-[Top-K Selection]
+[Fusion Algorithm Application (RRF/Weighted/Learned)]
+    ↓
+[Unified Ranking & Deduplication]
+    ↓
+[Top-K Selection from Fused Results]
     ↓
 [Context Assembly]
     ↓
@@ -883,25 +1358,64 @@ Response
 ### **Description**
 Specifically optimized for multi-turn conversations with advanced context tracking, follow-up handling, and clarification capabilities.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│Conversation │    │    Context      │    │     Query       │
+│  History    │───▶│    Window       │───▶│    Intent       │
+│   Store     │    │   Management    │    │ Classification  │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+        ▲                                           │
+        │                                           ▼
+        │                  ┌─────────────────────────────────────────┐
+        │                  ▼                              ▼          ▼
+        │         ┌─────────────┐            ┌─────────────────┐ ┌─────────────┐
+        │         │  Follow-up  │            │   New Topic     │ │Clarification│
+        │         │ Reference   │            │     Fresh       │ │  Context    │
+        │         │ Resolution  │            │   Retrieval     │ │ Expansion   │
+        │         └─────────────┘            └─────────────────┘ └─────────────┘
+        │                  │                              │          │
+        │                  └──────────────────────────────┼──────────┘
+        │                                                 ▼
+        │                                        ┌─────────────────┐
+        │                                        │  Context-Aware  │
+        │                                        │   Retrieval     │
+        │                                        └─────────────────┘
+        │                                                 │
+        │                                                 ▼
+        │                                        ┌─────────────────┐
+        │                                        │ Conversational  │
+        │                                        │    Response     │
+        │                                        │   Generation    │
+        │                                        └─────────────────┘
+        │                                                 │
+        └─────────────────────────────────────────────────┘
+                        Update Conversation State
+```
+
 ### **Flow Diagram**
 ```
 Conversation History + New Query
     ↓
-[Context Window Management]
+[Load Conversation Context & History]
+    ↓
+[Context Window Management (Token Limits)]
     ↓
 [Conversation State Tracking]
     ↓
 [Query Intent Classification]
     ↓
-[Follow-up] → [Reference Resolution]
-[New Topic] → [Fresh Retrieval]
-[Clarification] → [Context Expansion]
+[Follow-up] → [Reference Resolution (Pronouns, "it", "that")]
+[New Topic] → [Fresh Retrieval with Clean Context]
+[Clarification] → [Context Expansion & Elaboration]
     ↓
 [Context-Aware Retrieval]
     ↓
 [Conversational Response Generation]
     ↓
-[Update Conversation State]
+[Update Conversation State & Memory]
+    ↓
+Response
 ```
 
 ### **Detailed Process**
@@ -939,23 +1453,56 @@ Conversation History + New Query
 ### **Description**
 Handles and integrates multiple modalities (text, images, audio, video) for comprehensive information retrieval and generation.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│Multi-Modal  │    │     Text        │    │     Text        │
+│   Query     │───▶│    Encoder      │───▶│   Vector DB     │
+│(Text+Image+ │    └─────────────────┘    └─────────────────┘
+│Audio+Video) │    ┌─────────────────┐    ┌─────────────────┐
+└─────────────┘───▶│     Image       │───▶│     Image       │
+        │          │    Encoder      │    │   Vector DB     │
+        │          └─────────────────┘    └─────────────────┘
+        │          ┌─────────────────┐    ┌─────────────────┐
+        ├─────────▶│     Audio       │───▶│     Audio       │
+        │          │    Encoder      │    │   Vector DB     │
+        │          └─────────────────┘    └─────────────────┘
+        │          ┌─────────────────┐    ┌─────────────────┐
+        └─────────▶│     Video       │───▶│     Video       │
+                   │    Encoder      │    │   Vector DB     │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+                   ┌─────────────────┐    ┌─────────────────┐
+                   │  Multi-Modal    │◀───│  Cross-Modal    │
+                   │      LLM        │    │   Retrieval     │
+                   │   Generator     │    │   & Alignment   │
+                   └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
-Multi-Modal Query (Text + Image/Audio)
+Multi-Modal Query (Text + Image/Audio/Video)
     ↓
-[Multi-Modal Encoding]
+[Multi-Modal Input Processing]
     ↓
-[Text Encoder] [Image Encoder] [Audio Encoder]
+[Text Encoder] [Image Encoder] [Audio Encoder] [Video Encoder]
     ↓
-[Cross-Modal Retrieval]
+[Cross-Modal Embedding Alignment]
     ↓
-[Text Docs] [Images] [Audio] [Videos]
+[Parallel Multi-Modal Retrieval]
     ↓
-[Multi-Modal Context Assembly]
+[Text Docs] [Images] [Audio Clips] [Video Segments]
     ↓
-[Multi-Modal LLM]
+[Cross-Modal Relevance Assessment]
     ↓
-[Multi-Modal Response]
+[Multi-Modal Context Assembly & Integration]
+    ↓
+[Multi-Modal LLM Processing]
+    ↓
+[Multi-Modal Response Generation]
+    ↓
+Multi-Modal Response (Text + Visual/Audio Elements)
 ```
 
 ### **Detailed Process**
@@ -993,21 +1540,51 @@ Multi-Modal Query (Text + Image/Audio)
 ### **Description**
 Optimized for low-latency, streaming responses with incremental retrieval and generation capabilities for real-time applications.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │      Fast       │    │     Cache       │
+│   Query     │───▶│     Query       │───▶│    Lookup       │
+└─────────────┘    │   Processing    │    │    System       │
+                   └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Streaming  │    │   Incremental   │    │   Optimized     │
+│  Response   │◀───│      LLM        │◀───│   Retrieval     │
+│  Delivery   │    │   Generation    │    │   (Approx.)     │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+        │                   │                       │
+        ▼                   ▼                       ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Client    │    │   Streaming     │    │   Background    │
+│ Real-time   │    │    Context      │    │     Cache       │
+│  Display    │    │   Assembly      │    │    Update       │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Fast Query Processing]
+[Fast Query Processing & Analysis]
     ↓
-[Cached/Indexed Retrieval]
+[Cache Lookup for Pre-computed Results]
     ↓
-[Streaming Context Assembly]
+[Cache Hit] → [Immediate Response]
+[Cache Miss] → [Optimized Retrieval]
     ↓
-[Incremental LLM Generation]
+[Approximate/Fast Retrieval Methods]
     ↓
-[Streaming Response Delivery]
+[Streaming Context Assembly (As Available)]
     ↓
-[Background Cache Update]
+[Incremental LLM Generation (Token Streaming)]
+    ↓
+[Real-Time Response Streaming to Client]
+    ↓
+[Background Cache Update & Index Optimization]
+    ↓
+Streaming Response Delivery
 ```
 
 ### **Detailed Process**
@@ -1045,23 +1622,73 @@ User Query
 ### **Description**
 Retrieves and integrates information from multiple distributed knowledge bases and data sources across different systems and organizations.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐
+│    User     │    │     Query       │
+│   Query     │───▶│   Routing &     │
+└─────────────┘    │  Distribution   │
+                   └─────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│   Source 1  │    │     Source 2    │    │  Source N   │
+│(Org A DB)   │    │   (Org B API)   │    │(External DB)│
+└─────────────┘    └─────────────────┘    └─────────────┘
+        │                   │                   │
+        ▼                   ▼                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
+│ Results A   │    │   Results B     │    │ Results N   │
+└─────────────┘    └─────────────────┘    └─────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            ▼
+                   ┌─────────────────┐
+                   │    Results      │
+                   │   Aggregation   │
+                   │   & Ranking     │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │   Federated     │
+                   │    Context      │
+                   │   Assembly      │
+                   └─────────────────┘
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │   Unified LLM   │
+                   │   Generation    │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
 User Query
     ↓
-[Query Routing & Distribution]
+[Query Analysis & Source Selection]
+    ↓
+[Query Routing & Distribution to Relevant Sources]
     ↓
 [Source 1] [Source 2] [Source 3] [Source N]
     ↓
-[Parallel Federated Retrieval]
+[Parallel Federated Retrieval with Authentication]
     ↓
-[Results Aggregation]
+[Results Collection from Distributed Sources]
     ↓
-[Cross-Source Ranking]
+[Cross-Source Relevance Assessment]
+    ↓
+[Authority & Trustworthiness Evaluation]
+    ↓
+[Cross-Source Ranking & Deduplication]
     ↓
 [Federated Context Assembly]
     ↓
 [Unified Response Generation]
+    ↓
+Response with Source Attribution
 ```
 
 ### **Detailed Process**
@@ -1099,23 +1726,71 @@ User Query
 ### **Description**
 Implements comprehensive security and privacy controls including access control, data masking, audit trails, and compliance features.
 
+### **Block Diagram**
+```
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│    User     │    │ Authentication  │    │  Authorization  │
+│   Query +   │───▶│   & Identity    │───▶│  & Access       │
+│   Creds     │    │  Verification   │    │   Control       │
+└─────────────┘    └─────────────────┘    └─────────────────┘
+                                                   │
+                                                   ▼
+┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Audit     │    │     Data        │    │  Permission-    │
+│   Logger    │◀───│ Classification  │◀───│     Based       │
+└─────────────┘    │  & Filtering    │    │   Retrieval     │
+        ▲          └─────────────────┘    └─────────────────┘
+        │                   │                       │
+        │                   ▼                       ▼
+        │          ┌─────────────────┐    ┌─────────────────┐
+        │          │   Privacy       │    │   Filtered      │
+        │          │  Preserving     │◀───│   Documents     │
+        │          │   Context       │    │                 │
+        │          │   Assembly      │    └─────────────────┘
+        │          └─────────────────┘
+        │                   │
+        │                   ▼
+        │          ┌─────────────────┐
+        │          │     Secure      │
+        │          │   Generation    │
+        │          │  with Masking   │
+        │          └─────────────────┘
+        │                   │
+        │                   ▼
+        │          ┌─────────────────┐
+        └──────────│   Compliant     │
+                   │   Response      │
+                   │   Delivery      │
+                   └─────────────────┘
+```
+
 ### **Flow Diagram**
 ```
-User Query + Authentication
+User Query + Authentication Credentials
     ↓
-[Access Control Check]
+[User Authentication & Identity Verification]
     ↓
-[Permission-Based Retrieval]
+[Authorization & Access Control Check]
     ↓
-[Data Classification & Filtering]
+[Permission-Based Document Access Control]
+    ↓
+[Data Classification & Sensitivity Assessment]
+    ↓
+[Security-Filtered Retrieval]
     ↓
 [Privacy-Preserving Context Assembly]
     ↓
-[Secure Generation with Masking]
+[Data Masking & Anonymization (if required)]
     ↓
-[Audit Logging]
+[Secure Generation with Privacy Controls]
+    ↓
+[Compliance Check (GDPR, HIPAA, etc.)]
+    ↓
+[Comprehensive Audit Logging]
     ↓
 [Compliant Response Delivery]
+    ↓
+Secure Response with Audit Trail
 ```
 
 ### **Detailed Process**
