@@ -237,7 +237,7 @@ graph TB
         Input[Input: Query Vector + Metadata]
         
         VectorSearch[Vector Search]
-        HybridSearch[Hybrid Search<br/>(Vector+Text)]
+        HybridSearch[Hybrid Search - Vector+Text]
         GraphSearch[Graph Search]
         ExternalAPI[External API Search]
         
@@ -641,35 +641,35 @@ graph TD
 graph TB
     subgraph "TECHNOLOGY STACK"
         subgraph "PRESENTATION LAYER"
-            Frontend[Frontend:<br/>React.js, Vue.js, Angular]
-            Mobile[Mobile:<br/>React Native, Flutter]
-            APIGateway[API Gateway:<br/>Kong, AWS API Gateway, Azure API Management]
+            Frontend[Frontend: React.js, Vue.js, Angular]
+            Mobile[Mobile: React Native, Flutter]
+            APIGateway[API Gateway: Kong, AWS API Gateway, Azure API Management]
         end
         
         subgraph "APPLICATION LAYER"
-            Backend[Backend:<br/>Python (FastAPI), Node.js, Java (Spring Boot)]
-            Orchestration[Orchestration:<br/>Apache Airflow, Prefect, Temporal]
-            Authentication[Authentication:<br/>Auth0, Keycloak, AWS Cognito]
+            Backend[Backend: Python (FastAPI), Node.js, Java (Spring Boot)]
+            Orchestration[Orchestration: Apache Airflow, Prefect, Temporal]
+            Authentication[Authentication: Auth0, Keycloak, AWS Cognito]
         end
         
         subgraph "RAG LAYER"
-            Framework[Framework:<br/>LangChain, LlamaIndex, Haystack]
-            Embedding[Embedding:<br/>OpenAI, Sentence Transformers, Cohere]
-            LLM[LLM:<br/>OpenAI GPT, Anthropic Claude, Azure OpenAI]
+            Framework[Framework: LangChain, LlamaIndex, Haystack]
+            Embedding[Embedding: OpenAI, Sentence Transformers, Cohere]
+            LLM[LLM: OpenAI GPT, Anthropic Claude, Azure OpenAI]
         end
         
         subgraph "DATA LAYER"
-            VectorDB[Vector DB:<br/>Pinecone, Weaviate, Chroma, Qdrant]
-            DocumentDB[Document DB:<br/>MongoDB, PostgreSQL, Elasticsearch]
-            GraphDB[Graph DB:<br/>Neo4j, Amazon Neptune, ArangoDB]
-            Cache[Cache:<br/>Redis, Memcached]
+            VectorDB[Vector DB: Pinecone, Weaviate, Chroma, Qdrant]
+            DocumentDB[Document DB: MongoDB, PostgreSQL, Elasticsearch]
+            GraphDB[Graph DB: Neo4j, Amazon Neptune, ArangoDB]
+            Cache[Cache: Redis, Memcached]
         end
         
         subgraph "INFRASTRUCTURE LAYER"
-            Container[Container:<br/>Docker, Kubernetes]
-            Cloud[Cloud:<br/>AWS, Azure, Google Cloud]
-            Monitoring[Monitoring:<br/>Prometheus, Grafana, DataDog]
-            Logging[Logging:<br/>ELK Stack, Fluentd, Splunk]
+            Container[Container: Docker, Kubernetes]
+            Cloud[Cloud: AWS, Azure, Google Cloud]
+            Monitoring[Monitoring: Prometheus, Grafana, DataDog]
+            Logging[Logging: ELK Stack, Fluentd, Splunk]
         end
     end
 ```
@@ -679,33 +679,33 @@ graph TB
 graph TB
     subgraph "COMPONENT SELECTION MATRIX"
         subgraph "Vector Database"
-            VDB1[Pinecone<br/>(Managed SaaS)]
-            VDB2[Weaviate<br/>(Self-hosted)]
-            VDB3[Chroma<br/>(Lightweight)]
+            VDB1[Pinecone - Managed SaaS]
+            VDB2[Weaviate - Self-hosted]
+            VDB3[Chroma - Lightweight]
         end
         
         subgraph "Embedding Model"
-            EM1[OpenAI Ada<br/>(High quality)]
-            EM2[Sentence-BERT<br/>(Self-hosted)]
-            EM3[Cohere<br/>(Multilingual)]
+            EM1[OpenAI Ada - High quality]
+            EM2[Sentence-BERT - Self-hosted]
+            EM3[Cohere - Multilingual]
         end
         
         subgraph "Language Model"
-            LM1[OpenAI GPT<br/>(Versatile)]
-            LM2[Anthropic Claude<br/>(Safety-focused)]
-            LM3[Azure OpenAI<br/>(Enterprise)]
+            LM1[OpenAI GPT - Versatile]
+            LM2[Anthropic Claude - Safety-focused]
+            LM3[Azure OpenAI - Enterprise]
         end
         
         subgraph "RAG Framework"
-            RF1[LangChain<br/>(Comprehensive)]
-            RF2[LlamaIndex<br/>(Data-focused)]
-            RF3[Haystack<br/>(Production)]
+            RF1[LangChain - Comprehensive]
+            RF2[LlamaIndex - Data-focused]
+            RF3[Haystack - Production]
         end
         
         subgraph "Orchestration"
-            O1[Kubernetes<br/>(Full-featured)]
-            O2[Docker Swarm<br/>(Simple)]
-            O3[AWS ECS<br/>(Managed)]
+            O1[Kubernetes - Full-featured]
+            O2[Docker Swarm - Simple]
+            O3[AWS ECS - Managed]
         end
     end
 ```
@@ -721,10 +721,10 @@ graph TB
 graph TB
     subgraph "DEPLOYMENT ARCHITECTURE OPTIONS"
         subgraph "Option A: Cloud-Native (Recommended for Scale)"
-            A_LB[Load Balancer<br/>(AWS ALB)]
-            A_API[API Gateway<br/>(Kong/AWS)]
-            A_RAG[RAG Service<br/>(Kubernetes)]
-            A_VDB[Vector Database<br/>(Pinecone)]
+            A_LB[Load Balancer - AWS ALB]
+            A_API[API Gateway - Kong/AWS]
+            A_RAG[RAG Service - Kubernetes]
+            A_VDB[Vector Database - Pinecone]
             
             A_LB --> A_API
             A_API --> A_RAG
@@ -797,9 +797,9 @@ graph TB
         end
         
         subgraph "Scaling Features"
-            LoadBalancing[Load Balancing:<br/>Round-robin, Least connections, Weighted]
-            AutoScaling[Auto-scaling:<br/>CPU/Memory based, Queue length based]
-            CircuitBreakers[Circuit Breakers:<br/>Prevent cascade failures]
+            LoadBalancing[Load Balancing: Round-robin, Least connections, Weighted]
+            AutoScaling[Auto-scaling: CPU/Memory based, Queue length based]
+            CircuitBreakers[Circuit Breakers: Prevent cascade failures]
         end
     end
 ```
@@ -901,7 +901,7 @@ graph TB
 graph TB
     subgraph "SECURITY CONTROLS MATRIX"
         subgraph "Network Layer"
-            N_Control[Firewall Rules<br/>VPC/Subnets]
+            N_Control[Firewall Rules - VPC/Subnets]
             N_Impl[AWS Security Groups/NACLs]
             N_Compliance[SOC 2 Type II]
             
@@ -910,8 +910,8 @@ graph TB
         end
         
         subgraph "Application Layer"
-            A_Control[Authentication<br/>Authorization]
-            A_Impl[OAuth 2.0/OIDC<br/>RBAC/ABAC]
+            A_Control[Authentication - Authorization]
+            A_Impl[OAuth 2.0/OIDC - RBAC/ABAC]
             A_Compliance[GDPR Article 32]
             
             A_Control --> A_Impl
@@ -919,8 +919,8 @@ graph TB
         end
         
         subgraph "Data Layer"
-            D_Control[Encryption<br/>Key Management]
-            D_Impl[AES-256/TLS 1.3<br/>AWS KMS/Vault]
+            D_Control[Encryption - Key Management]
+            D_Impl[AES-256/TLS 1.3 - AWS KMS/Vault]
             D_Compliance[HIPAA Security Rule]
             
             D_Control --> D_Impl
@@ -928,8 +928,8 @@ graph TB
         end
         
         subgraph "Monitoring Layer"
-            M_Control[Audit Logging<br/>Anomaly Detection]
-            M_Impl[CloudTrail/SIEM<br/>ML-based]
+            M_Control[Audit Logging - Anomaly Detection]
+            M_Impl[CloudTrail/SIEM - ML-based]
             M_Compliance[PCI DSS 10.x]
             
             M_Control --> M_Impl
@@ -1242,7 +1242,7 @@ graph TB
                 C1[• Service down]
                 C2[• Data loss]
                 C3[• Security breach]
-                C_Response[Response: Immediate<br/>PagerDuty]
+                C_Response[Response: Immediate - PagerDuty]
                 
                 C1 --> C_Response
                 C2 --> C_Response
@@ -1253,7 +1253,7 @@ graph TB
                 W1[• High latency]
                 W2[• Error rate spike]
                 W3[• Resource exhaustion]
-                W_Response[Response: 30 minutes<br/>Slack/Email]
+                W_Response[Response: 30 minutes - Slack/Email]
                 
                 W1 --> W_Response
                 W2 --> W_Response
@@ -1264,7 +1264,7 @@ graph TB
                 I1[• Deployment complete]
                 I2[• Scale events]
                 I3[• Config changes]
-                I_Response[Response: Next day<br/>Email]
+                I_Response[Response: Next day - Email]
                 
                 I1 --> I_Response
                 I2 --> I_Response
@@ -1275,7 +1275,7 @@ graph TB
                 D1[• Performance metrics]
                 D2[• Debug info]
                 D3[• Trace data]
-                D_Response[Response: No action<br/>Log only]
+                D_Response[Response: No action - Log only]
                 
                 D1 --> D_Response
                 D2 --> D_Response
