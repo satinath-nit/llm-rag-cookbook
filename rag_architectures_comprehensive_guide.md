@@ -1,5 +1,4 @@
 # Comprehensive Guide to RAG Architecture Patterns
-## Detailed Explanations with Block Diagrams and Flow Diagrams
 
 ---
 
@@ -9,34 +8,12 @@
 The foundational RAG pattern that follows a straightforward retrieve-then-generate workflow. This is the most basic implementation where user queries directly trigger document retrieval followed by response generation.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │   Vector DB     │    │      LLM        │
-│   Query     │───▶│   (Documents)   │───▶│   Generator     │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                            │                       │
-                            ▼                       ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │   Embedding     │    │   Generated     │
-                   │    Model        │    │   Response      │
-                   └─────────────────┘    └─────────────────┘
-```
-
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Processing & Embedding]
-    ↓
-[Vector Similarity Search]
-    ↓
-[Retrieved Documents (Top-K)]
-    ↓
-[Context Assembly: Query + Documents]
-    ↓
-[LLM Generation]
-    ↓
-Generated Response
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> VectorDB[Vector DB Documents]
+    VectorDB --> LLMGen[LLM Generator]
+    VectorDB --> EmbedModel[Embedding Model]
+    LLMGen --> Response[Generated Response]
 ```
 
 ### **Detailed Process**
@@ -74,43 +51,17 @@ Generated Response
 Extends basic RAG by maintaining conversation history and context across multiple interactions. This pattern enables more natural conversational experiences.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │   Memory        │    │   Vector DB     │
-│   Query     │───▶│   Store         │───▶│   (Documents)   │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                            │                       │
-                            ▼                       ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │ Conversation    │    │      LLM        │
-                   │   Context       │───▶│   Generator     │
-                   └─────────────────┘    └─────────────────┘
-                            ▲                       │
-                            │                       ▼
-                            └───────────────────────┘
-                                 Update Memory
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> MemoryStore[Memory Store]
+    MemoryStore --> VectorDB[Vector DB Documents]
+    MemoryStore --> ConvContext[Conversation Context]
+    VectorDB --> LLMGen[LLM Generator]
+    ConvContext --> LLMGen
+    LLMGen --> Response[Generated Response]
+    Response --> MemoryStore
 ```
 
-### **Flow Diagram**
-```
-User Query + Conversation History
-    ↓
-[Load Previous Context from Memory]
-    ↓
-[Context Assembly: Current Query + Previous Context]
-    ↓
-[Enhanced Query Processing]
-    ↓
-[Vector Search with Historical Context]
-    ↓
-[Retrieved Documents + Memory Context]
-    ↓
-[Context + Query + History → LLM]
-    ↓
-Generated Response
-    ↓
-[Update Conversation Memory]
-```
 
 ### **Detailed Process**
 1. **Input Processing**: Receive current query and load conversation history
@@ -147,46 +98,16 @@ Generated Response
 Breaks RAG into specialized, interchangeable modules that can be independently optimized and customized. This architecture promotes flexibility and scalability.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Query     │    │   Retrieval     │    │   Reranking     │
-│ Processing  │───▶│   Strategy      │───▶│    Module       │
-│   Module    │    │    Module       │    │                 │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                                                   │
-┌─────────────┐    ┌─────────────────┐           ▼
-│    Post     │    │   Generation    │    ┌─────────────────┐
-│ Processing  │◀───│    Module       │◀───│   Context       │
-│   Module    │    │                 │    │  Assembly       │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-       │                                           ▲
-       ▼                                           │
-┌─────────────┐    ┌─────────────────┐           │
-│   Final     │    │   Document      │───────────┘
-│  Response   │    │   Retrieval     │
-└─────────────┘    │    Module       │
-                   └─────────────────┘
-```
-
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Processing Module]
-    ↓
-[Retrieval Strategy Selection Module]
-    ↓
-[Document Retrieval Module]
-    ↓
-[Reranking Module]
-    ↓
-[Context Assembly Module]
-    ↓
-[Generation Module]
-    ↓
-[Post-processing Module]
-    ↓
-Final Response
+```mermaid
+flowchart TB
+    QueryProc[Query Processing Module] --> RetrievalStrat[Retrieval Strategy Module]
+    RetrievalStrat --> DocRetrieval[Document Retrieval Module]
+    DocRetrieval --> Reranking[Reranking Module]
+    Reranking --> ContextAssembly[Context Assembly Module]
+    ContextAssembly --> Generation[Generation Module]
+    Generation --> PostProc[Post Processing Module]
+    PostProc --> FinalResp[Final Response]
+    DocRetrieval --> ContextAssembly
 ```
 
 ### **Detailed Process**
@@ -226,52 +147,15 @@ Final Response
 Uses AI agents to intelligently orchestrate the RAG process, making autonomous decisions about when to retrieve, what sources to use, and how to synthesize information.
 
 ### **Block Diagram**
-```
-                    ┌─────────────────┐
-                    │     Agent       │
-                    │   Controller    │
-                    └─────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
-│   Query     │    │   Retrieval     │    │ Synthesis   │
-│  Analysis   │    │    Agent(s)     │    │   Agent     │
-│   Agent     │    │                 │    │             │
-└─────────────┘    └─────────────────┘    └─────────────┘
-                            │                   │
-                            ▼                   ▼
-                   ┌─────────────────┐    ┌─────────────┐
-                   │  Data Sources   │    │  Quality    │
-                   │   (Multiple)    │    │ Assessment  │
-                   └─────────────────┘    │   Agent     │
-                                          └─────────────┘
+```mermaid
+flowchart TB
+    AgentController[Agent Controller] --> QueryAnalysis[Query Analysis Agent]
+    AgentController --> RetrievalAgent[Retrieval Agent]
+    AgentController --> SynthesisAgent[Synthesis Agent]
+    RetrievalAgent --> DataSources[Data Sources Multiple]
+    SynthesisAgent --> QualityAgent[Quality Assessment Agent]
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Agent Controller Initialization]
-    ↓
-[Query Analysis Agent]
-    ↓
-[Decision: Retrieval Strategy & Sources]
-    ↓
-[Retrieval Agent(s)] ←→ [Multiple Data Sources]
-    ↓
-[Information Collection & Validation]
-    ↓
-[Synthesis Agent]
-    ↓
-[Quality Assessment Agent]
-    ↓
-[Decision: Sufficient/Need More Info]
-    ↓
-[Iterative Loop if Needed]
-    ↓
-Generated Response
-```
 
 ### **Detailed Process**
 1. **Agent Initialization**: Main controller agent receives user query
@@ -310,50 +194,17 @@ Generated Response
 Microsoft's approach that builds and utilizes knowledge graphs for enhanced retrieval and reasoning. It creates structured representations of relationships between entities.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Document   │    │     Entity      │    │   Knowledge     │
-│ Collection  │───▶│   Extraction    │───▶│     Graph       │
-└─────────────┘    │    & Linking    │    │   Database      │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-┌─────────────┐    ┌─────────────────┐           ▼
-│    User     │    │     Entity      │    ┌─────────────────┐
-│   Query     │───▶│  Recognition    │───▶│     Graph       │
-└─────────────┘    │   in Query      │    │   Traversal     │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │      LLM        │◀───│   Subgraph      │
-                   │   Generator     │    │   Extraction    │
-                   └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    DocCollection[Document Collection] --> EntityExtract[Entity Extraction & Linking]
+    EntityExtract --> KnowledgeGraph[Knowledge Graph Database]
+    UserQuery[User Query] --> EntityRecog[Entity Recognition in Query]
+    EntityRecog --> GraphTraversal[Graph Traversal]
+    KnowledgeGraph --> GraphTraversal
+    GraphTraversal --> SubgraphExtract[Subgraph Extraction]
+    SubgraphExtract --> LLMGen[LLM Generator]
 ```
 
-### **Flow Diagram**
-```
-Documents
-    ↓
-[Entity Extraction & Recognition]
-    ↓
-[Relationship Mapping & Classification]
-    ↓
-[Knowledge Graph Construction]
-    ↓
-User Query
-    ↓
-[Entity Recognition in Query]
-    ↓
-[Graph Traversal & Path Finding]
-    ↓
-[Subgraph Extraction (Relevant Entities + Relations)]
-    ↓
-[Graph-based Context Assembly]
-    ↓
-[LLM with Graph Context + Original Documents]
-    ↓
-Response with Enhanced Relationship Understanding
-```
 
 ### **Detailed Process**
 1. **Graph Construction**: Extract entities and relationships from documents
@@ -391,44 +242,17 @@ Response with Enhanced Relationship Understanding
 Generates hypothetical answers first, then retrieves documents similar to these hypothetical responses. This bridges the semantic gap between queries and documents.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │      LLM        │    │   Embedding     │
-│   Query     │───▶│  (Hypothesis    │───▶│     Model       │
-└─────────────┘    │  Generation)    │    │                 │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Final     │    │      LLM        │    │   Vector DB     │
-│  Response   │◀───│  (Final Gen)    │◀───│   Search        │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                            ▲                       │
-                            │                       ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │   Original      │    │   Retrieved     │
-                   │    Query        │    │   Documents     │
-                   └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> LLMHypo[LLM Hypothesis Generation]
+    LLMHypo --> EmbedModel[Embedding Model]
+    EmbedModel --> VectorDBSearch[Vector DB Search]
+    VectorDBSearch --> RetrievedDocs[Retrieved Documents]
+    RetrievedDocs --> LLMFinal[LLM Final Gen]
+    UserQuery --> LLMFinal
+    LLMFinal --> FinalResponse[Final Response]
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[LLM: Generate Hypothetical Answer]
-    ↓
-[Embed Hypothetical Answer using Same Model]
-    ↓
-[Vector Similarity Search: Find Documents Similar to Hypothesis]
-    ↓
-[Retrieved Real Documents (Top-K)]
-    ↓
-[Context Assembly: Original Query + Retrieved Documents]
-    ↓
-[LLM Final Generation with Real Context]
-    ↓
-Final Accurate Response
-```
 
 ### **Detailed Process**
 1. **Query Reception**: Receive user's original question
@@ -466,61 +290,23 @@ Final Accurate Response
 Uses multiple embedding models or creates different vector representations to capture various aspects of content (semantic, syntactic, domain-specific).
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Document   │    │   Semantic      │    │   Vector DB     │
-│ Collection  │───▶│   Embedding     │───▶│   (Semantic)    │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-       │
-       ├───────────▶┌─────────────────┐───▶┌─────────────────┐
-       │            │   Keyword       │    │   Vector DB     │
-       │            │   Embedding     │    │   (Keyword)     │
-       │            └─────────────────┘    └─────────────────┘
-       │
-       └───────────▶┌─────────────────┐───▶┌─────────────────┐
-                    │    Domain       │    │   Vector DB     │
-                    │   Embedding     │    │   (Domain)      │
-                    └─────────────────┘    └─────────────────┘
-                                                   │
-┌─────────────┐    ┌─────────────────┐           ▼
-│    User     │    │   Multi-Vector  │    ┌─────────────────┐
-│   Query     │───▶│     Query       │───▶│     Fusion      │
-└─────────────┘    │   Encoding      │    │   Algorithm     │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │      LLM        │◀───│    Unified      │
-                   │   Generator     │    │    Context      │
-                   └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    DocCollection[Document Collection] --> SemanticEmbed[Semantic Embedding]
+    DocCollection --> KeywordEmbed[Keyword Embedding]
+    DocCollection --> DomainEmbed[Domain Embedding]
+    SemanticEmbed --> VectorDBSem[Vector DB Semantic]
+    KeywordEmbed --> VectorDBKey[Vector DB Keyword]
+    DomainEmbed --> VectorDBDom[Vector DB Domain]
+    UserQuery[User Query] --> MultiVectorQuery[Multi-Vector Query Encoding]
+    VectorDBSem --> FusionAlgo[Fusion Algorithm]
+    VectorDBKey --> FusionAlgo
+    VectorDBDom --> FusionAlgo
+    MultiVectorQuery --> FusionAlgo
+    FusionAlgo --> UnifiedContext[Unified Context]
+    UnifiedContext --> LLMGen[LLM Generator]
 ```
 
-### **Flow Diagram**
-```
-Documents
-    ↓
-[Multiple Embedding Models Processing]
-    ↓
-[Semantic Vectors] [Keyword Vectors] [Domain Vectors]
-    ↓
-[Store in Separate Vector Databases]
-    ↓
-User Query
-    ↓
-[Multi-Vector Query Encoding (All Models)]
-    ↓
-[Parallel Vector Searches Across All DBs]
-    ↓
-[Collect Results from All Vector Spaces]
-    ↓
-[Result Fusion & Ranking Algorithm]
-    ↓
-[Unified Retrieved Context]
-    ↓
-[LLM Generation]
-    ↓
-Response
-```
 
 ### **Detailed Process**
 1. **Multi-Vector Indexing**: Create multiple vector representations per document
@@ -558,54 +344,22 @@ Response
 Retrieves information at multiple granularity levels (document, section, paragraph, sentence) to provide comprehensive and contextually appropriate responses.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Document   │    │   Document      │    │   Document      │
-│ Collection  │───▶│   Level Index   │───▶│   Level Search  │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-       │                                           │
-       ├───────────▶┌─────────────────┐───▶┌─────────────────┐
-       │            │   Section       │    │   Section       │
-       │            │   Level Index   │    │   Level Search  │
-       │            └─────────────────┘    └─────────────────┘
-       │                                           │
-       └───────────▶┌─────────────────┐───▶┌─────────────────┐
-                    │  Paragraph      │    │  Paragraph      │
-                    │  Level Index    │    │  Level Search   │
-                    └─────────────────┘    └─────────────────┘
-                                                   │
-┌─────────────┐    ┌─────────────────┐           ▼
-│    User     │    │  Granularity    │    ┌─────────────────┐
-│   Query     │───▶│   Analysis      │───▶│  Hierarchical   │
-└─────────────┘    └─────────────────┘    │   Context       │
-                                          │   Assembly      │
-                                          └─────────────────┘
-                                                   │
-                                                   ▼
-                                          ┌─────────────────┐
-                                          │      LLM        │
-                                          │   Generator     │
-                                          └─────────────────┘
+```mermaid
+flowchart TB
+    DocCollection[Document Collection] --> DocLevelIndex[Document Level Index]
+    DocCollection --> SectionLevelIndex[Section Level Index]
+    DocCollection --> ParaLevelIndex[Paragraph Level Index]
+    DocLevelIndex --> DocLevelSearch[Document Level Search]
+    SectionLevelIndex --> SectionLevelSearch[Section Level Search]
+    ParaLevelIndex --> ParaLevelSearch[Paragraph Level Search]
+    UserQuery[User Query] --> GranularityAnalysis[Granularity Analysis]
+    DocLevelSearch --> HierarchicalContext[Hierarchical Context Assembly]
+    SectionLevelSearch --> HierarchicalContext
+    ParaLevelSearch --> HierarchicalContext
+    GranularityAnalysis --> HierarchicalContext
+    HierarchicalContext --> LLMGen[LLM Generator]
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Complexity & Granularity Analysis]
-    ↓
-[Document-Level Search] → [Relevant Documents Identified]
-    ↓
-[Section-Level Search within Documents] → [Relevant Sections]
-    ↓
-[Paragraph-Level Search within Sections] → [Relevant Paragraphs]
-    ↓
-[Hierarchical Context Assembly (Maintain Structure)]
-    ↓
-[Multi-Level Context → LLM]
-    ↓
-Response with Hierarchical Understanding
-```
 
 ### **Detailed Process**
 1. **Query Analysis**: Determine appropriate granularity levels needed
@@ -643,49 +397,18 @@ Response with Hierarchical Understanding
 Rewrites and optimizes user queries before retrieval to improve search effectiveness and handle ambiguous or poorly formed queries.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │     Query       │    │     Query       │
-│   Query     │───▶│   Analysis      │───▶│   Rewriting     │
-│ (Original)  │    │    Module       │    │    Module       │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Final     │    │      LLM        │    │   Vector DB     │
-│  Response   │◀───│   Generator     │◀───│    Search       │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                            ▲                       │
-                            │                       ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │   Original      │    │   Retrieved     │
-                   │    Query        │    │   Documents     │
-                   │   Context       │    │                 │
-                   └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    UserQuery[User Query Original] --> QueryAnalysis[Query Analysis Module]
+    QueryAnalysis --> QueryRewriting[Query Rewriting Module]
+    QueryRewriting --> VectorDBSearch[Vector DB Search]
+    VectorDBSearch --> RetrievedDocs[Retrieved Documents]
+    RetrievedDocs --> LLMGen[LLM Generator]
+    UserQuery --> OriginalQueryContext[Original Query Context]
+    OriginalQueryContext --> LLMGen
+    LLMGen --> FinalResponse[Final Response]
 ```
 
-### **Flow Diagram**
-```
-Original User Query
-    ↓
-[Query Analysis (Ambiguity, Completeness, Intent)]
-    ↓
-[Query Rewriting Strategy Selection]
-    ↓
-[Query Rewriting/Expansion/Clarification]
-    ↓
-[Optimized Query Generation]
-    ↓
-[Vector Search with Optimized Query]
-    ↓
-[Retrieved Documents]
-    ↓
-[Context Assembly: Original Query Intent + Retrieved Context]
-    ↓
-[LLM Generation]
-    ↓
-Response
-```
 
 ### **Detailed Process**
 1. **Query Reception**: Receive original user query
@@ -751,28 +474,6 @@ Generates multiple variations of the user's query to ensure comprehensive inform
                    └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-Original Query
-    ↓
-[Query Variation Generation (Paraphrases, Expansions, Perspectives)]
-    ↓
-[Query 1] [Query 2] [Query 3] [Query N]
-    ↓
-[Parallel Retrieval for Each Query Variation]
-    ↓
-[Result Set 1] [Result Set 2] [Result Set 3] [Result Set N]
-    ↓
-[Result Collection & Deduplication]
-    ↓
-[Cross-Query Relevance Ranking]
-    ↓
-[Unified Context Assembly]
-    ↓
-[LLM with Comprehensive Context]
-    ↓
-Response
-```
 
 ### **Detailed Process**
 1. **Query Reception**: Receive original user query
@@ -838,26 +539,6 @@ The model evaluates its own outputs and retrieval decisions using special reflec
                    └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Retrieval Necessity Assessment with Reflection Tokens]
-    ↓
-[Decision: Retrieve?] → Yes/No
-    ↓
-[Document Retrieval] (if needed)
-    ↓
-[Generate Response with Self-Reflection Tokens]
-    ↓
-[Self-Evaluation: Relevance, Support, Utility]
-    ↓
-[Quality Assessment using Reflection Tokens]
-    ↓
-[Decision: Accept/Revise/Re-retrieve]
-    ↓
-[Final Response] or [Iteration Loop]
-```
 
 ### **Detailed Process**
 1. **Query Analysis**: Assess whether retrieval is necessary for the query
@@ -924,28 +605,6 @@ Evaluates the quality and relevance of retrieved documents and performs correcti
                                           └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Initial Document Retrieval]
-    ↓
-[Document Relevance & Quality Evaluation]
-    ↓
-[Relevance Scoring & Classification]
-    ↓
-[High Relevance] → [Direct Generation]
-[Low Relevance] → [Web Search/Re-retrieval]
-[Mixed Relevance] → [Filter Relevant + Web Search]
-    ↓
-[Corrective Action Execution]
-    ↓
-[Corrected Context Assembly]
-    ↓
-[Final Response Generation with Quality Check]
-    ↓
-Response
-```
 
 ### **Detailed Process**
 1. **Initial Retrieval**: Perform standard document retrieval
@@ -983,51 +642,21 @@ Response
 Dynamically selects the most appropriate RAG strategy based on query characteristics, complexity, and available resources.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │     Query       │    │   Strategy      │
-│   Query     │───▶│   Complexity    │───▶│   Selection     │
-└─────────────┘    │   Analyzer      │    │    Engine       │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-        ┌──────────────────────────────────────────┼──────────────────────────────────────────┐
-        ▼                              ▼                              ▼                        ▼
-┌─────────────┐            ┌─────────────────┐            ┌─────────────┐            ┌─────────────┐
-│   Simple    │            │    Complex      │            │Multi-faceted│            │Conversational│
-│    RAG      │            │     RAG         │            │ Branched RAG│            │ Memory RAG  │
-└─────────────┘            └─────────────────┘            └─────────────┘            └─────────────┘
-        │                              │                              │                        │
-        └──────────────────────────────┼──────────────────────────────┼────────────────────────┘
-                                       ▼                              ▼
-                              ┌─────────────────┐            ┌─────────────────┐
-                              │   Performance   │            │     Final       │
-                              │   Monitoring    │            │   Response      │
-                              └─────────────────┘            └─────────────────┘
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> QueryComplexityAnalyzer[Query Complexity Analyzer]
+    QueryComplexityAnalyzer --> StrategySelectionEngine[Strategy Selection Engine]
+    StrategySelectionEngine --> SimpleRAG[Simple RAG]
+    StrategySelectionEngine --> ComplexRAG[Complex RAG]
+    StrategySelectionEngine --> MultifacetedRAG[Multi-faceted Branched RAG]
+    StrategySelectionEngine --> ConversationalRAG[Conversational Memory RAG]
+    SimpleRAG --> PerformanceMonitoring[Performance Monitoring]
+    ComplexRAG --> PerformanceMonitoring
+    MultifacetedRAG --> FinalResponse[Final Response]
+    ConversationalRAG --> FinalResponse
+    PerformanceMonitoring --> FinalResponse
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Complexity & Type Analysis]
-    ↓
-[Resource Assessment (Time, Compute, Accuracy Requirements)]
-    ↓
-[Strategy Selection Engine]
-    ↓
-[Simple Query] → [Basic RAG]
-[Complex Query] → [Advanced RAG (Self-RAG, CRAG)]
-[Multi-faceted] → [Branched RAG]
-[Conversational] → [Memory RAG]
-    ↓
-[Execute Selected Strategy with Optimal Parameters]
-    ↓
-[Performance Monitoring & Feedback]
-    ↓
-[Strategy Adjustment if Needed]
-    ↓
-Response Generation
-```
 
 ### **Detailed Process**
 1. **Query Reception**: Receive and initially process user query
@@ -1099,30 +728,6 @@ Decomposes complex queries into multiple sub-queries that are processed in paral
                    └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-Complex User Query
-    ↓
-[Query Analysis & Complexity Assessment]
-    ↓
-[Query Decomposition into Sub-queries]
-    ↓
-[Sub-query 1] [Sub-query 2] [Sub-query 3] [Sub-query N]
-    ↓
-[Parallel RAG Processing for Each Sub-query]
-    ↓
-[Individual Retrieval & Generation]
-    ↓
-[Result 1] [Result 2] [Result 3] [Result N]
-    ↓
-[Dependency Resolution & Consistency Check]
-    ↓
-[Result Synthesis & Integration]
-    ↓
-[Comprehensive Final Response Assembly]
-    ↓
-Final Response
-```
 
 ### **Detailed Process**
 1. **Query Analysis**: Analyze complex query for decomposable components
@@ -1194,32 +799,6 @@ Performs multiple cycles of retrieval and generation, using insights from each c
                    └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Initial Retrieval & Generation Cycle]
-    ↓
-[Partial Response Analysis]
-    ↓
-[Information Gap Identification]
-    ↓
-[Gap Assessment: Critical/Minor/Complete]
-    ↓
-[Refined Retrieval Query Generation]
-    ↓
-[Additional Retrieval (Targeted)]
-    ↓
-[Enhanced Context Assembly (Cumulative)]
-    ↓
-[Improved Generation with Enhanced Context]
-    ↓
-[Completeness & Quality Check]
-    ↓
-[Decision: Iterate/Finalize] → [Loop if needed]
-    ↓
-[Final Response]
-```
 
 ### **Detailed Process**
 1. **Initial Cycle**: Perform standard RAG retrieval and generation
@@ -1296,32 +875,6 @@ Combines multiple retrieval methods, ranking algorithms, and information sources
                    └─────────────────┘
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Distribution to Multiple Retrieval Methods]
-    ↓
-[Vector Search] [Keyword Search] [Graph Search] [Hybrid Search]
-    ↓
-[Parallel Execution & Result Collection]
-    ↓
-[Multiple Result Sets with Different Scoring]
-    ↓
-[Score Normalization Across Methods]
-    ↓
-[Fusion Algorithm Application (RRF/Weighted/Learned)]
-    ↓
-[Unified Ranking & Deduplication]
-    ↓
-[Top-K Selection from Fused Results]
-    ↓
-[Context Assembly]
-    ↓
-[LLM Generation]
-    ↓
-Response
-```
 
 ### **Detailed Process**
 1. **Multi-Method Retrieval**: Execute multiple retrieval approaches simultaneously
@@ -1454,56 +1007,23 @@ Response
 Handles and integrates multiple modalities (text, images, audio, video) for comprehensive information retrieval and generation.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│Multi-Modal  │    │     Text        │    │     Text        │
-│   Query     │───▶│    Encoder      │───▶│   Vector DB     │
-│(Text+Image+ │    └─────────────────┘    └─────────────────┘
-│Audio+Video) │    ┌─────────────────┐    ┌─────────────────┐
-└─────────────┘───▶│     Image       │───▶│     Image       │
-        │          │    Encoder      │    │   Vector DB     │
-        │          └─────────────────┘    └─────────────────┘
-        │          ┌─────────────────┐    ┌─────────────────┐
-        ├─────────▶│     Audio       │───▶│     Audio       │
-        │          │    Encoder      │    │   Vector DB     │
-        │          └─────────────────┘    └─────────────────┘
-        │          ┌─────────────────┐    ┌─────────────────┐
-        └─────────▶│     Video       │───▶│     Video       │
-                   │    Encoder      │    │   Vector DB     │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-                   ┌─────────────────┐    ┌─────────────────┐
-                   │  Multi-Modal    │◀───│  Cross-Modal    │
-                   │      LLM        │    │   Retrieval     │
-                   │   Generator     │    │   & Alignment   │
-                   └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    MultiModalQuery[Multi-Modal Query Text+Image+Audio+Video] --> TextEncoder[Text Encoder]
+    MultiModalQuery --> ImageEncoder[Image Encoder]
+    MultiModalQuery --> AudioEncoder[Audio Encoder]
+    MultiModalQuery --> VideoEncoder[Video Encoder]
+    TextEncoder --> TextVectorDB[Text Vector DB]
+    ImageEncoder --> ImageVectorDB[Image Vector DB]
+    AudioEncoder --> AudioVectorDB[Audio Vector DB]
+    VideoEncoder --> VideoVectorDB[Video Vector DB]
+    TextVectorDB --> CrossModalRetrieval[Cross-Modal Retrieval & Alignment]
+    ImageVectorDB --> CrossModalRetrieval
+    AudioVectorDB --> CrossModalRetrieval
+    VideoVectorDB --> CrossModalRetrieval
+    CrossModalRetrieval --> MultiModalLLM[Multi-Modal LLM Generator]
 ```
 
-### **Flow Diagram**
-```
-Multi-Modal Query (Text + Image/Audio/Video)
-    ↓
-[Multi-Modal Input Processing]
-    ↓
-[Text Encoder] [Image Encoder] [Audio Encoder] [Video Encoder]
-    ↓
-[Cross-Modal Embedding Alignment]
-    ↓
-[Parallel Multi-Modal Retrieval]
-    ↓
-[Text Docs] [Images] [Audio Clips] [Video Segments]
-    ↓
-[Cross-Modal Relevance Assessment]
-    ↓
-[Multi-Modal Context Assembly & Integration]
-    ↓
-[Multi-Modal LLM Processing]
-    ↓
-[Multi-Modal Response Generation]
-    ↓
-Multi-Modal Response (Text + Visual/Audio Elements)
-```
 
 ### **Detailed Process**
 1. **Multi-Modal Input**: Receive query containing text, images, audio, or video
@@ -1541,51 +1061,18 @@ Multi-Modal Response (Text + Visual/Audio Elements)
 Optimized for low-latency, streaming responses with incremental retrieval and generation capabilities for real-time applications.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │      Fast       │    │     Cache       │
-│   Query     │───▶│     Query       │───▶│    Lookup       │
-└─────────────┘    │   Processing    │    │    System       │
-                   └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Streaming  │    │   Incremental   │    │   Optimized     │
-│  Response   │◀───│      LLM        │◀───│   Retrieval     │
-│  Delivery   │    │   Generation    │    │   (Approx.)     │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-        │                   │                       │
-        ▼                   ▼                       ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client    │    │   Streaming     │    │   Background    │
-│ Real-time   │    │    Context      │    │     Cache       │
-│  Display    │    │   Assembly      │    │    Update       │
-└─────────────┘    └─────────────────┘    └─────────────────┘
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> FastQueryProc[Fast Query Processing]
+    FastQueryProc --> CacheLookup[Cache Lookup System]
+    CacheLookup --> OptimizedRetrieval[Optimized Retrieval Approx]
+    OptimizedRetrieval --> IncrementalLLM[Incremental LLM Generation]
+    IncrementalLLM --> StreamingResponse[Streaming Response Delivery]
+    IncrementalLLM --> StreamingContext[Streaming Context Assembly]
+    OptimizedRetrieval --> BackgroundCache[Background Cache Update]
+    StreamingResponse --> ClientRealTime[Client Real-time Display]
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Fast Query Processing & Analysis]
-    ↓
-[Cache Lookup for Pre-computed Results]
-    ↓
-[Cache Hit] → [Immediate Response]
-[Cache Miss] → [Optimized Retrieval]
-    ↓
-[Approximate/Fast Retrieval Methods]
-    ↓
-[Streaming Context Assembly (As Available)]
-    ↓
-[Incremental LLM Generation (Token Streaming)]
-    ↓
-[Real-Time Response Streaming to Client]
-    ↓
-[Background Cache Update & Index Optimization]
-    ↓
-Streaming Response Delivery
-```
 
 ### **Detailed Process**
 1. **Fast Query Processing**: Rapid query analysis and preprocessing
@@ -1623,73 +1110,22 @@ Streaming Response Delivery
 Retrieves and integrates information from multiple distributed knowledge bases and data sources across different systems and organizations.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐
-│    User     │    │     Query       │
-│   Query     │───▶│   Routing &     │
-└─────────────┘    │  Distribution   │
-                   └─────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
-│   Source 1  │    │     Source 2    │    │  Source N   │
-│(Org A DB)   │    │   (Org B API)   │    │(External DB)│
-└─────────────┘    └─────────────────┘    └─────────────┘
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────┐
-│ Results A   │    │   Results B     │    │ Results N   │
-└─────────────┘    └─────────────────┘    └─────────────┘
-        │                   │                   │
-        └───────────────────┼───────────────────┘
-                            ▼
-                   ┌─────────────────┐
-                   │    Results      │
-                   │   Aggregation   │
-                   │   & Ranking     │
-                   └─────────────────┘
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │   Federated     │
-                   │    Context      │
-                   │   Assembly      │
-                   └─────────────────┘
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │   Unified LLM   │
-                   │   Generation    │
-                   └─────────────────┘
+```mermaid
+flowchart TB
+    UserQuery[User Query] --> QueryRouting[Query Routing & Distribution]
+    QueryRouting --> Source1[Source 1 Org A DB]
+    QueryRouting --> Source2[Source 2 Org B API]
+    QueryRouting --> SourceN[Source N External DB]
+    Source1 --> ResultsA[Results A]
+    Source2 --> ResultsB[Results B]
+    SourceN --> ResultsN[Results N]
+    ResultsA --> ResultsAggregation[Results Aggregation & Ranking]
+    ResultsB --> ResultsAggregation
+    ResultsN --> ResultsAggregation
+    ResultsAggregation --> FederatedContext[Federated Context Assembly]
+    FederatedContext --> UnifiedLLM[Unified LLM Generation]
 ```
 
-### **Flow Diagram**
-```
-User Query
-    ↓
-[Query Analysis & Source Selection]
-    ↓
-[Query Routing & Distribution to Relevant Sources]
-    ↓
-[Source 1] [Source 2] [Source 3] [Source N]
-    ↓
-[Parallel Federated Retrieval with Authentication]
-    ↓
-[Results Collection from Distributed Sources]
-    ↓
-[Cross-Source Relevance Assessment]
-    ↓
-[Authority & Trustworthiness Evaluation]
-    ↓
-[Cross-Source Ranking & Deduplication]
-    ↓
-[Federated Context Assembly]
-    ↓
-[Unified Response Generation]
-    ↓
-Response with Source Attribution
-```
 
 ### **Detailed Process**
 1. **Query Distribution**: Route query to relevant federated data sources
@@ -1727,71 +1163,21 @@ Response with Source Attribution
 Implements comprehensive security and privacy controls including access control, data masking, audit trails, and compliance features.
 
 ### **Block Diagram**
-```
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    User     │    │ Authentication  │    │  Authorization  │
-│   Query +   │───▶│   & Identity    │───▶│  & Access       │
-│   Creds     │    │  Verification   │    │   Control       │
-└─────────────┘    └─────────────────┘    └─────────────────┘
-                                                   │
-                                                   ▼
-┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Audit     │    │     Data        │    │  Permission-    │
-│   Logger    │◀───│ Classification  │◀───│     Based       │
-└─────────────┘    │  & Filtering    │    │   Retrieval     │
-        ▲          └─────────────────┘    └─────────────────┘
-        │                   │                       │
-        │                   ▼                       ▼
-        │          ┌─────────────────┐    ┌─────────────────┐
-        │          │   Privacy       │    │   Filtered      │
-        │          │  Preserving     │◀───│   Documents     │
-        │          │   Context       │    │                 │
-        │          │   Assembly      │    └─────────────────┘
-        │          └─────────────────┘
-        │                   │
-        │                   ▼
-        │          ┌─────────────────┐
-        │          │     Secure      │
-        │          │   Generation    │
-        │          │  with Masking   │
-        │          └─────────────────┘
-        │                   │
-        │                   ▼
-        │          ┌─────────────────┐
-        └──────────│   Compliant     │
-                   │   Response      │
-                   │   Delivery      │
-                   └─────────────────┘
+```mermaid
+flowchart TB
+    UserQueryCreds[User Query + Creds] --> AuthIdentity[Authentication & Identity Verification]
+    AuthIdentity --> AuthzAccess[Authorization & Access Control]
+    AuthzAccess --> PermissionRetrieval[Permission-Based Retrieval]
+    PermissionRetrieval --> DataClassification[Data Classification & Filtering]
+    PermissionRetrieval --> FilteredDocs[Filtered Documents]
+    DataClassification --> PrivacyContext[Privacy Preserving Context Assembly]
+    FilteredDocs --> PrivacyContext
+    PrivacyContext --> SecureGeneration[Secure Generation with Masking]
+    SecureGeneration --> CompliantResponse[Compliant Response Delivery]
+    DataClassification --> AuditLogger[Audit Logger]
+    CompliantResponse --> AuditLogger
 ```
 
-### **Flow Diagram**
-```
-User Query + Authentication Credentials
-    ↓
-[User Authentication & Identity Verification]
-    ↓
-[Authorization & Access Control Check]
-    ↓
-[Permission-Based Document Access Control]
-    ↓
-[Data Classification & Sensitivity Assessment]
-    ↓
-[Security-Filtered Retrieval]
-    ↓
-[Privacy-Preserving Context Assembly]
-    ↓
-[Data Masking & Anonymization (if required)]
-    ↓
-[Secure Generation with Privacy Controls]
-    ↓
-[Compliance Check (GDPR, HIPAA, etc.)]
-    ↓
-[Comprehensive Audit Logging]
-    ↓
-[Compliant Response Delivery]
-    ↓
-Secure Response with Audit Trail
-```
 
 ### **Detailed Process**
 1. **Authentication**: Verify user identity and credentials
@@ -1851,4 +1237,4 @@ Secure Response with Audit Trail
 
 ---
 
-This comprehensive guide provides detailed explanations and flow diagrams for each RAG architecture pattern, helping you understand when and how to implement each approach based on your specific requirements and constraints.
+This comprehensive guide provides detailed explanations and Mermaid block diagrams for each RAG architecture pattern, helping you understand when and how to implement each approach based on your specific requirements and constraints.
