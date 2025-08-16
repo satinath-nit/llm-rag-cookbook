@@ -214,7 +214,7 @@ graph TB
         Expansion[Expansion & Rewriting]
         VectorRep[Vector Representation]
         
-        Output[Output: Processed Query + Vector Embedding + Metadata]
+        Output[Output: Processed Query + Vector + Metadata]
         
         Input --> QueryVal
         QueryVal --> IntentDet
@@ -252,7 +252,7 @@ graph TB
             Dedup --> ResultAgg
         end
         
-        Output[Output: Ranked & Filtered Document Chunks + Relevance Scores]
+        Output[Output: Ranked Documents + Relevance Scores]
         
         Input --> VectorSearch
         Input --> HybridSearch
@@ -272,7 +272,7 @@ graph TB
 ```mermaid
 graph TB
     subgraph "CONTEXT ASSEMBLY COMPONENT"
-        Input[Input: Retrieved Documents + Original Query + User Context]
+        Input[Input: Retrieved Docs + Query + Context]
         
         DocSelect[Document Selection & Filtering]
         ContextOrder[Context Ordering & Ranking]
@@ -284,7 +284,7 @@ graph TB
         TemplatePopulation[Template Population]
         ContextValidation[Context Validation]
         
-        Output[Output: Optimized Context + Formatted Prompt]
+        Output[Output: Optimized Context + Prompt]
         
         Input --> DocSelect
         DocSelect --> ContextOrder
@@ -304,7 +304,7 @@ graph TB
 ```mermaid
 graph TB
     subgraph "GENERATION ENGINE COMPONENT"
-        Input[Input: Formatted Prompt + Context + Generation Parameters]
+        Input[Input: Prompt + Context + Parameters]
         
         LLMInference[LLM Inference]
         ResponseGen[Response Generation]
@@ -316,7 +316,7 @@ graph TB
         HallucinationDet[Hallucination Detection]
         SourceAttrib[Source Attribution]
         
-        Output[Output: Generated Response + Confidence Score + Source References]
+        Output[Output: Response + Confidence + Sources]
         
         Input --> LLMInference
         LLMInference --> ResponseGen
@@ -641,35 +641,35 @@ graph TD
 graph TB
     subgraph "TECHNOLOGY STACK"
         subgraph "PRESENTATION LAYER"
-            Frontend[Frontend: React.js, Vue.js, Angular]
-            Mobile[Mobile: React Native, Flutter]
-            APIGateway[API Gateway: Kong, AWS API Gateway, Azure API Management]
+            Frontend[Frontend: React/Vue/Angular]
+            Mobile[Mobile: React Native/Flutter]
+            APIGateway[API Gateway: Kong/AWS/Azure]
         end
         
         subgraph "APPLICATION LAYER"
-            Backend[Backend: Python (FastAPI), Node.js, Java (Spring Boot)]
-            Orchestration[Orchestration: Apache Airflow, Prefect, Temporal]
-            Authentication[Authentication: Auth0, Keycloak, AWS Cognito]
+            Backend[Backend: Python/Node.js/Java]
+            Orchestration[Orchestration: Airflow/Prefect/Temporal]
+            Authentication[Authentication: Auth0/Keycloak/Cognito]
         end
         
         subgraph "RAG LAYER"
-            Framework[Framework: LangChain, LlamaIndex, Haystack]
-            Embedding[Embedding: OpenAI, Sentence Transformers, Cohere]
-            LLM[LLM: OpenAI GPT, Anthropic Claude, Azure OpenAI]
+            Framework[Framework: LangChain/LlamaIndex/Haystack]
+            Embedding[Embedding: OpenAI/SBERT/Cohere]
+            LLM[LLM: OpenAI/Claude/Azure]
         end
         
         subgraph "DATA LAYER"
-            VectorDB[Vector DB: Pinecone, Weaviate, Chroma, Qdrant]
-            DocumentDB[Document DB: MongoDB, PostgreSQL, Elasticsearch]
-            GraphDB[Graph DB: Neo4j, Amazon Neptune, ArangoDB]
-            Cache[Cache: Redis, Memcached]
+            VectorDB[Vector DB: Pinecone/Weaviate/Chroma/Qdrant]
+            DocumentDB[Document DB: MongoDB/PostgreSQL/ES]
+            GraphDB[Graph DB: Neo4j/Neptune/ArangoDB]
+            Cache[Cache: Redis/Memcached]
         end
         
         subgraph "INFRASTRUCTURE LAYER"
-            Container[Container: Docker, Kubernetes]
-            Cloud[Cloud: AWS, Azure, Google Cloud]
-            Monitoring[Monitoring: Prometheus, Grafana, DataDog]
-            Logging[Logging: ELK Stack, Fluentd, Splunk]
+            Container[Container: Docker/Kubernetes]
+            Cloud[Cloud: AWS/Azure/GCP]
+            Monitoring[Monitoring: Prometheus/Grafana/DataDog]
+            Logging[Logging: ELK/Fluentd/Splunk]
         end
     end
 ```
@@ -730,8 +730,8 @@ graph TB
             A_API --> A_RAG
             A_RAG --> A_VDB
             
-            A_Benefits[Benefits: Auto-scaling, High availability, Managed services]
-            A_Costs[Costs: Higher operational costs, Vendor lock-in]
+            A_Benefits[Benefits: Auto-scaling/HA/Managed]
+            A_Costs[Costs: Higher ops costs/Vendor lock-in]
         end
         
         subgraph "Option B: Hybrid (Balanced Approach)"
@@ -744,8 +744,8 @@ graph TB
             B_API --> B_RAG
             B_RAG --> B_VDB
             
-            B_Benefits[Benefits: Data control, Cost optimization, Flexibility]
-            B_Costs[Costs: Complex management, Network latency]
+            B_Benefits[Benefits: Data control/Cost optimization]
+            B_Costs[Costs: Complex management/Network latency]
         end
         
         subgraph "Option C: On-Premise (Security-First)"
@@ -758,8 +758,8 @@ graph TB
             C_API --> C_RAG
             C_RAG --> C_VDB
             
-            C_Benefits[Benefits: Full control, Data sovereignty, Security]
-            C_Costs[Costs: High infrastructure costs, Manual scaling]
+            C_Benefits[Benefits: Full control/Data sovereignty]
+            C_Costs[Costs: High infrastructure/Manual scaling]
         end
     end
 ```
@@ -797,9 +797,9 @@ graph TB
         end
         
         subgraph "Scaling Features"
-            LoadBalancing[Load Balancing: Round-robin, Least connections, Weighted]
-            AutoScaling[Auto-scaling: CPU/Memory based, Queue length based]
-            CircuitBreakers[Circuit Breakers: Prevent cascade failures]
+            LoadBalancing[Load Balancing: RR/LC/Weighted]
+            AutoScaling[Auto-scaling: CPU/Memory/Queue based]
+            CircuitBreakers[Circuit Breakers: Prevent cascades]
         end
     end
 ```
@@ -835,9 +835,9 @@ graph TB
         end
         
         subgraph "Optimization Techniques"
-            OT1[• Async processing for non-blocking operations]
+            OT1[• Async processing for non-blocking ops]
             OT2[• Batch processing for multiple queries]
-            OT3[• Connection pooling for database access]
+            OT3[• Connection pooling for DB access]
             OT4[• Compression for data transfer]
             OT5[• CDN for static content delivery]
             OT6[• Index optimization for faster retrieval]
@@ -987,10 +987,10 @@ graph TB
         end
         
         subgraph "Quality Metrics"
-            QM1["• Retrieval Accuracy: > 85% relevant documents in top-5"]
-            QM2["• Response Relevance: > 90% user satisfaction score"]
-            QM3["• Hallucination Rate: < 5% of responses"]
-            QM4["• Source Attribution: 100% of factual claims"]
+            QM1["• Retrieval Accuracy: > 85% in top-5"]
+            QM2["• Response Relevance: > 90% satisfaction"]
+            QM3["• Hallucination Rate: < 5%"]
+            QM4["• Source Attribution: 100%"]
         end
     end
 ```
@@ -1030,17 +1030,17 @@ graph TB
         end
         
         subgraph "Load Balancing Strategy"
-            LB1["• Application Load Balancer with health checks"]
+            LB1["• App Load Balancer with health checks"]
             LB2["• Weighted routing for A/B testing"]
-            LB3["• Geographic routing for global deployment"]
+            LB3["• Geographic routing for global deploy"]
             LB4["• Circuit breakers for fault tolerance"]
         end
         
         subgraph "Caching Strategy"
-            L1["L1: In-memory cache (Redis) - 1ms latency"]
-            L2["L2: Distributed cache (ElastiCache) - 5ms latency"]
-            L3["L3: CDN cache (CloudFront) - 50ms latency"]
-            CI["Cache invalidation based on content updates"]
+            L1["L1: In-memory cache - 1ms"]
+            L2["L2: Distributed cache - 5ms"]
+            L3["L3: CDN cache - 50ms"]
+            CI["Cache invalidation on content updates"]
         end
     end
 ```
@@ -1059,7 +1059,7 @@ graph TB
             Dev_VDB[Minimal Vector DB]
             Dev_Data[Sample Data]
             
-            Dev_Purpose[Purpose: Feature development, Unit testing, Debugging]
+            Dev_Purpose[Purpose: Development/Testing/Debug]
             
             Dev_IDE --- Dev_Docker
             Dev_Docker --- Dev_VDB
@@ -1072,7 +1072,7 @@ graph TB
             Stg_VDB[Production Vector DB]
             Stg_Data[Anonymized Data]
             
-            Stg_Purpose[Purpose: Integration testing, Performance testing, UAT]
+            Stg_Purpose[Purpose: Integration/Performance/UAT]
             
             Stg_K8s --- Stg_Services
             Stg_Services --- Stg_VDB
@@ -1085,7 +1085,7 @@ graph TB
             Prod_VDB[Enterprise Vector DB]
             Prod_Data[Production Data]
             
-            Prod_Purpose[Purpose: Live user traffic, High availability, Full monitoring]
+            Prod_Purpose[Purpose: Live traffic/HA/Monitoring]
             
             Prod_K8s --- Prod_Auto
             Prod_Auto --- Prod_VDB
@@ -1124,11 +1124,11 @@ graph LR
             Stage1[1. Code Commit → Trigger pipeline]
             Stage2[2. Security Scan → SAST/DAST analysis]
             Stage3[3. Build → Docker image creation]
-            Stage4[4. Test → Unit, integration, performance tests]
+            Stage4[4. Test → Unit/integration/performance]
             Stage5[5. Deploy → Staging environment]
             Stage6[6. Validate → Automated acceptance tests]
             Stage7[7. Promote → Production deployment]
-            Stage8[8. Monitor → Health checks and rollback if needed]
+            Stage8[8. Monitor → Health checks/rollback]
             
             Stage1 --> Stage2
             Stage2 --> Stage3
@@ -1284,14 +1284,14 @@ graph TB
         end
         
         subgraph "Incident Response Workflow"
-            Step1[1. Alert Detection → Automated monitoring triggers]
-            Step2[2. Incident Creation → Ticket created in incident management system]
-            Step3[3. Team Notification → On-call engineer notified]
-            Step4[4. Initial Assessment → Severity and impact evaluation]
-            Step5[5. Response Team Assembly → Escalate if needed]
+            Step1[1. Alert Detection → Monitoring triggers]
+            Step2[2. Incident Creation → Ticket created]
+            Step3[3. Team Notification → On-call notified]
+            Step4[4. Initial Assessment → Severity evaluation]
+            Step5[5. Response Team → Escalate if needed]
             Step6[6. Investigation → Root cause analysis]
             Step7[7. Resolution → Fix implementation]
-            Step8[8. Post-Incident Review → Lessons learned and improvements]
+            Step8[8. Post-Incident → Lessons learned]
             
             Step1 --> Step2
             Step2 --> Step3
