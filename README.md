@@ -1,4 +1,5 @@
 # llm-rag-cookbook
+This repository contains a comprehensive guide to 21+ RAG (Retrieval-Augmented Generation) architecture patterns. It provides detailed explanations, block diagrams, and use cases for each pattern, helping developers and researchers understand when and how to implement each approach based on their specific requirements and constraints. The patterns covered range from basic, modular, and hierarchical RAG to more advanced approaches like adaptive, fusion, and conversational RAG. Additionally, the repository includes examples of real-world applications and benefits of each pattern, as well as limitations and potential challenges.
 
 Complete Coverage of 21+ RAG Patterns:
 
